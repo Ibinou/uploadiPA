@@ -33,58 +33,58 @@
     <div class="file"></div>
   </div>
 
-  <script>
-    window.onload = () => {
-      const $form = document.querySelector(".form");
-      let fileData = null;
+<script>
+  window.onload = () => {
+    const $form = document.querySelector(".form");
+    let fileData = null;
 
-      $form.addEventListener("submit", (event) => {
-        event.preventDefault();
+    $form.addEventListener("submit", (event) => {
+      event.preventDefault();
 
-        if (!fileData) {
-          alert('File is empty, please select or paste');
-          return;
-        }
-
-        const formData = new FormData($form);
-        const data = {};
-
-        for (let [key, value] of formData.entries()) {
-          data[key] = value;
-        }
-
-        // Send file data along with other form data
-        uploadFile({
-          ...data,
-          file: fileData
-        }).then(res => {
-          let message = res.message ? res.message : `Upload success: <a href="${res.content.html_url}">${res.content.html_url}</a>`;
-          console.log('res', res);
-          document.querySelector('.log').innerHTML = message;
-        });
-      });
-
-      // Update fileData on file input change
-      document.querySelector('.local').addEventListener('change', handleFileChange);
-    };
-
-    function handleFileChange(event) {
-      const fileInput = event.target;
-      const file = fileInput.files[0];
-
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-          fileData = {
-            name: file.name,
-            type: file.type,
-            content: e.target.result.split('base64,')[1]
-          };
-        };
-        reader.readAsDataURL(file);
+      if (!fileData) {
+        alert('File is empty, please select or paste');
+        return;
       }
+
+      const formData = new FormData($form);
+      const data = {};
+
+      for (let [key, value] of formData.entries()) {
+        data[key] = value;
+      }
+
+      // Send file data along with other form data
+      uploadFile({
+        ...data,
+        file: fileData
+      }).then(res => {
+        let message = res.message ? res.message : `Upload success: <a href="${res.content.html_url}">${res.content.html_url}</a>`;
+        console.log('res', res);
+        document.querySelector('.log').innerHTML = message;
+      });
+    });
+
+    // Update fileData on file input change
+    document.querySelector('.local').addEventListener('change', handleFileChange);
+  };
+
+  function handleFileChange(event) {
+    const fileInput = event.target;
+    const file = fileInput.files[0];
+
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        fileData = {
+          name: file.name,
+          type: file.type,
+          content: e.target.result.split('base64,')[1]
+        };
+      };
+      reader.readAsDataURL(file);
     }
-  </script>
+  }
+</script>
 
 </body>
 
