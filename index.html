@@ -75,10 +75,11 @@
     if (file) {
       const reader = new FileReader();
       reader.onload = function (e) {
+        const base64Content = e.target.result.split(',')[1];
         fileData = {
           name: file.name,
           type: file.type,
-          content: e.target.result.split('base64,')[1]
+          content: base64Content
         };
       };
       reader.readAsDataURL(file);
