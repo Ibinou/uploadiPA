@@ -1,92 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>File Upload Form</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Upload</title>
 </head>
-
 <body>
+    <form id="uploadForm" enctype="multipart/form-data">
+        <label for="fileInput">Choose a file:</label>
+        <input type="file" id="fileInput" name="upload_file" required>
+        <br>
+        <button type="button" onclick="uploadFile()">Upload</button>
+    </form>
 
-  <form class="form">
-    <label>
-      GitHub Access Token: <input required name="token" placeholder="ghp_xxxxxxx" />
-    </label>
+    <script>
+        function uploadFile() {
+            var form = document.getElementById('uploadForm');
+            var formData = new FormData(form);
 
-    <label>
-      GitHub Repo Owner: <input required name="owner" placeholder="" />
-    </label>
+            // Add access_token and account_id to formData (replace 'YOUR_ACCESS_TOKEN' and 'YOUR_ACCOUNT_ID')
+            formData.append('access_token', 'nkKjNYoT0tH5jYzmBx9FcIhOSngyT7CtDxr4iy8XKq5LiAEeV4Zo3RUbWQ10sCt9');
+            formData.append('account_id', 'YOUR_ACCOUNT_ID');
 
-    <label>
-      GitHub Repo Name: <input required name="repo" placeholder="" />
-    </label>
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', 'https://cloud.cocotweaks.com/api/v2/file/upload', true);
 
-    <button type="submit"> Upload </button>
-    <div class="log"></div>
-  </form>
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    var response = JSON.parse(xhr.responseText);
+                    if (response._status === 'success') {
+                        // File uploaded successfully, you can handle the response data here
+                        console.log(response.data);
+                    } else {
+                        // Handle errors
+                        console.error(response._status);
+                    }
+                } else {
+                    // Handle other HTTP status codes
+                    console.error('Error: ' + xhr.status);
+                }
+            };
 
-  <div class="container">
-    <h5>File info</h5>
-    <input type="file" class="local" />
-    <button class="paste"> Paste from clipboard </button>
-    <div class="file"></div>
-  </div>
-
-<script>
-  window.onload = () => {
-    const $form = document.querySelector(".form");
-    let fileData = null;
-
-    $form.addEventListener("submit", (event) => {
-      event.preventDefault();
-
-      if (!fileData) {
-        alert('File is empty, please select or paste');
-        return;
-      }
-
-      const formData = new FormData($form);
-      const data = {};
-
-      for (let [key, value] of formData.entries()) {
-        data[key] = value;
-      }
-
-      // Send file data along with other form data
-      uploadFile({
-        ...data,
-        file: fileData
-      }).then(res => {
-        let message = res.message ? res.message : `Upload success: <a href="${res.content.html_url}">${res.content.html_url}</a>`;
-        console.log('res', res);
-        document.querySelector('.log').innerHTML = message;
-      });
-    });
-
-    // Update fileData on file input change
-    document.querySelector('.local').addEventListener('change', handleFileChange);
-  };
-
-  function handleFileChange(event) {
-    const fileInput = event.target;
-    const file = fileInput.files[0];
-
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = function (e) {
-        const base64Content = e.target.result.split(',')[1];
-        fileData = {
-          name: file.name,
-          type: file.type,
-          content: base64Content
-        };
-      };
-      reader.readAsDataURL(file);
-    }
-  }
-</script>
-
+            xhr.send(formData);
+        }
+    </script>
 </body>
-
 </html>
