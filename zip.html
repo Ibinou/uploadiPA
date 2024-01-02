@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Télécharger Archive Zip</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.min.js"></script>
+</head>
+<body>
+
+  <script>
+    function setLocalStorageItems() {
+      const lien1 = "Contenu du fichier 1";
+      const lien2 = "Contenu du fichier 2";
+
+      // Set items dans le local storage
+      localStorage.setItem('lien1', lien1);
+      localStorage.setItem('lien2', lien2);
+
+      // Alertes pour indiquer que les liens ont été définis
+      alert('lien1 a été défini dans le local storage.');
+      alert('lien2 a été défini dans le local storage.');
+    }
+
+    function downloadZip() {
+      // Récupérer les liens depuis le local storage
+      const link1 = localStorage.getItem('lien1');
+      const link2 = localStorage.getItem('lien2');
+
+      // Créer une instance de JSZip
+      const zip = new JSZip();
+
+      // Ajouter les fichiers à l'archive zip
+      zip.file('fichier1.txt', link1);
+      zip.file('fichier2.txt', link2);
+
+      // Générer le fichier zip
+      zip.generateAsync({ type: 'blob' }).then((blob) => {
+        // Télécharger le fichier zip
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'archive.zip';
+        link.click();
+      });
+    }
+  </script>
+
+  <button onclick="setLocalStorageItems()">Définir les liens dans le Local Storage</button>
+  <button onclick="downloadZip()">Télécharger l'Archive Zip</button>
+
+</body>
+</html>
