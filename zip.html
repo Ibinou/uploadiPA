@@ -9,44 +9,54 @@
 <body>
 
   <script>
-    function setLocalStorageItems() {
-      const lien1 = "Contenu du fichier 1";
-      const lien2 = "Contenu du fichier 2";
+    function addLinkToLocalStorage() {
+      // Inviter l'utilisateur à saisir le lien
+      const link = prompt('Veuillez saisir le lien du fichier :');
 
-      // Set items dans le local storage
-      localStorage.setItem('lien1', lien1);
-      localStorage.setItem('lien2', lien2);
-
-      // Alertes pour indiquer que les liens ont été définis
-      alert('lien1 a été défini dans le local storage.');
-      alert('lien2 a été défini dans le local storage.');
+      if (link) {
+        // Ajouter le lien au local storage
+        localStorage.setItem('fichierMobileProvision', link);
+        alert('Le lien a été ajouté au local storage.');
+      } else {
+        alert('Aucun lien n\'a été saisi.');
+      }
     }
 
     function downloadZip() {
-      // Récupérer les liens depuis le local storage
-      const link1 = localStorage.getItem('lien1');
-      const link2 = localStorage.getItem('lien2');
+      // Récupérer le lien du fichier depuis le local storage
+      const fileLink = localStorage.getItem('fichierMobileProvision');
 
-      // Créer une instance de JSZip
-      const zip = new JSZip();
+      if (!fileLink) {
+        alert('Aucun lien trouvé dans le local storage.');
+        return;
+      }
 
-      // Ajouter les fichiers à l'archive zip
-      zip.file('fichier1.txt', link1);
-      zip.file('fichier2.txt', link2);
+      // Utiliser Fetch pour récupérer le fichier
+      fetch(fileLink)
+        .then(response => response.blob())
+        .then(blob => {
+          // Créer une instance de JSZip
+          const zip = new JSZip();
 
-      // Générer le fichier zip
-      zip.generateAsync({ type: 'blob' }).then((blob) => {
-        // Télécharger le fichier zip
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = 'archive.zip';
-        link.click();
-      });
+          // Ajouter le fichier à l'archive zip
+          zip.file('fichierMobileProvision.mobileprovision', blob);
+
+          // Générer le fichier zip
+          zip.generateAsync({ type: 'blob' }).then((zipBlob) => {
+            // Télécharger le fichier zip
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(zipBlob);
+            link.download = 'archive.zip';
+            link.click();
+          });
+        })
+        .catch(error => alert('Une erreur s\'est produite lors du téléchargement du fichier : ' + error));
     }
   </script>
 
-  <button onclick="setLocalStorageItems()">Définir les liens dans le Local Storage</button>
+  <button onclick="addLinkToLocalStorage()">Ajouter un lien</button>
   <button onclick="downloadZip()">Télécharger l'Archive Zip</button>
 
 </body>
 </html>
+  
