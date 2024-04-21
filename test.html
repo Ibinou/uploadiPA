@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Console Logger</title>
+<style>
+    .container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+    .console {
+        width: 300px;
+        height: 200px;
+        border: 1px solid #ccc;
+        overflow-y: scroll;
+        margin: 10px;
+        padding: 10px;
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="console" id="console1"></div>
+    <div class="console" id="console2"></div>
+</div>
+<div class="container">
+    <button onclick="runScript1()">Run Script 1</button>
+    <button onclick="runScript2()">Run Script 2</button>
+</div>
+
+<script>
+    function log(message, consoleId) {
+        const consoleElement = document.getElementById(consoleId);
+        const p = document.createElement('p');
+        p.textContent = message;
+        consoleElement.appendChild(p);
+    }
+
+    function clearConsole(consoleId) {
+        const consoleElement = document.getElementById(consoleId);
+        consoleElement.innerHTML = '';
+    }
+
+    async function runScript1() {
+        clearConsole('console1');
+        log('Script 1 started.', 'console1');
+
+        class InstallTokenRequest {
+            constructor(bundleID) {
+                this.bundleID = bundleID;
+            }
+        }
+
+        class AuthRequest {
+            constructor(clientID) {
+                this.client_id = clientID;
+            }
+        }
+
+        class InitialJWT {
+            constructor(sessionID, emailAddress) {
+                var header = {
+                    "alg": "none",
+                    "typ": "JWT"
+                };
+
+                var stringifiedHeader = CryptoJS.enc.Utf8.parse(JSON.stringify(header));
+                var encodedHeader = base64url(stringifiedHeader);
+
+                const now = Date.now() / 1000
+
+                var data = {
+                    "iss": "altstore.io",
+                    "sub": emailAddress,
+                    "session_id": sessionID,
+                    "iat": now,
+                    "exp": now + (15 * 60),
+                    "nonce": crypto.randomUUID(),
+                };
+
+                var stringifiedData = CryptoJS.enc.Utf8.parse(JSON.stringify(data));
+                var encodedData = base64url(stringifiedData);
+
+                //TODO: Add basic encryption.
+                var token = encodedHeader + "." + encodedData + ".";
+                this.token = token;
+            }
+        }
+
+        async function downloadAltStore() {
+            console.log("Downloading AltStore...");
+
+            const queryString = window.location.search;
+
+            const urlParams = new URLSearchParams(queryString);
+            const sessionID = urlParams.get('session');
+            const emailAddress = urlParams.get('email');
+
+            if (sessionID == null) {
+                console.log("No session ID, aborting.");
+                return;
+            }
+
+            console.log("SessionID=" + sessionID);
+
+            // Request install verification token
+            const installVerificationToken = await requestInstallVerificationToken();
+
+            // Create JWT
+            const adpURL = "https://altstore.io/download/adp/altstore/2.0";
+            const token = new InitialJWT(sessionID, emailAddress); // TO string
+
+            console.log("Initial Token: " + token.token);
+
+            //TODO: Add back token
+            const installURL = "marketplace-kit://install?alternativeDistributionPackage=" + adpURL /*+ "&token=" + token.token*/ + "&installVerificationToken=" + installVerificationToken;
+            console.log("Install URL: " + installURL);
+            window.location.href = installURL;
+        }
+
+        async function requestInstallVerificationToken() {
+            const apiURL = "https://8b7i0f8qea.execute-api.eu-central-1.amazonaws.com/install-token";
+            const body = new InstallTokenRequest("io.altstore.AltStore");
+
+            const rawResponse = await fetch(apiURL, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(body)
+            });
+
+            const content = await rawResponse.json();
+
+            const token = content.token;
+
+            console.log("Install Token: " + token);
+
+            return token;
+        }
+
+        function base64url(source) {
+            // Encode in classical base64
+            encodedSource = CryptoJS.enc.Base64.stringify(source);
+
+            // Remove padding equal characters
+            encodedSource = encodedSource.replace(/=+$/, '');
+
+            // Replace characters according to base64url specifications
+            encodedSource = encodedSource.replace(/\+/g, '-');
+            encodedSource = encodedSource.replace(/\//g, '_');
+
+            return encodedSource;
+        }
+
+        await downloadAltStore();
+
+        log('Script 1 completed.', 'console1');
+    }
+
+    async function runScript2() {
+        clearConsole('console2');
+        log('Script 2 started.', 'console2');
+
+        class InstallTokenRequest {
+            constructor(bundleID) {
+                this.bundleID = bundleID;
+            }
+        }
+
+        class AuthRequest {
+            constructor(clientID) {
+                this.client_id = clientID;
+            }
+        }
+
+        class InitialJWT {
+            constructor(sessionID, emailAddress) {
+                var header = {
+                    "alg": "none",
+                    "typ": "JWT"
+                };
+
+                var stringifiedHeader = CryptoJS.enc.Utf8.parse(JSON.stringify(header));
+                var encodedHeader = base64url(stringifiedHeader);
+
+                const now = Date.now() / 1000
+
+                var data = {
+                    "iss": "altstore.io",
+                    "sub": emailAddress,
+                    "session_id": sessionID,
+                    "iat": now,
+                    "exp": now + (15 * 60),
+                    "nonce": crypto.randomUUID(),
+                };
+
+                var stringifiedData = CryptoJS.enc.Utf8.parse(JSON.stringify(data));
+                var encodedData = base64url(stringifiedData);
+
+                //TODO: Add basic encryption.
+                var token = encodedHeader + "." + encodedData + ".";
+                this.token = token;
+            }
+        }
+
+        async function simulateOAuthFlow(token) {
+            const authURL = "https://8b7i0f8qea.execute-api.eu-central-1.amazonaws.com/oauth/auth";
+            const body = new AuthRequest("dummy-apple-id");
+
+            const rawResponse = await fetch(authURL, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token,
+                },
+                body: JSON.stringify(body)
+            });
+
+            const content = await rawResponse.json();
+
+            console.log("ClientID: " + content.client_id + " client_secret: " + content.client_secret);
+
+            const tokenURL = "https://8b7i0f8qea.execute-api.eu-central-1.amazonaws.com/oauth/token";
+            const rawTokenResponse = await fetch(tokenURL, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + content.client_secret,
+                },
+                body: "{}"
+            });
+
+            const tokenResponse = await rawTokenResponse.json();
+
+            console.log("Access Token: " + tokenResponse.access_token);
+        }
+
+        async function requestInstallVerificationToken() {
+            const apiURL = "https://8b7i0f8qea.execute-api.eu-central-1.amazonaws.com/install-token";
+            const body = new InstallTokenRequest("io.altstore.AltStore");
+
+            const rawResponse = await fetch(apiURL, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(body)
+            });
+
+            const content = await rawResponse.json();
+
+            const token = content.token;
+
+            console.log("Install Token: " + token);
+
+            return token;
+        }
+
+        function base64url(source) {
+            // Encode in classical base64
+            encodedSource = CryptoJS.enc.Base64.stringify(source);
+
+            // Remove padding equal characters
+            encodedSource = encodedSource.replace(/=+$/, '');
+
+            // Replace characters according to base64url specifications
+            encodedSource = encodedSource.replace(/\+/g, '-');
+            encodedSource = encodedSource.replace(/\//g, '_');
+
+            return encodedSource;
+        }
+
+        log('Script 2 completed.', 'console2');
+    }
+</script>
+</body>
+</html>
